@@ -39,4 +39,5 @@ go:
 # .golangci.yml file at the top level of your repo.
 script:
 #   - golangci-lint run       # run a bunch of code checkers/linters in parallel
-  - go test -v ./...  # Run all the tests with the race detector enabled
+  - go test -v -cover ./...  # Run all the tests with the race detector enabled
+  - go build
