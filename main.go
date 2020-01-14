@@ -1,7 +1,7 @@
 package main
 
 import(
-	"aes-encryption/utils"
+	"go-aes-encryption-example/utils"
 	"fmt"
 )
 
