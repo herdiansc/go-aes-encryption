@@ -1,14 +1,18 @@
 package main
 
-import(
-	"go-aes-encryption-example/utils"
+import (
 	"fmt"
+	"go-aes-encryption-example/utils"
 )
 
-
 func main() {
+	plaintext := "secret"
+	key := "AES256Key-32Characters1234567890"
+
 	enc := utils.NewAes()
-	ciphertext := "CYKQ+Id2N2O/UGmCBcGxkxw5jabj7kgfkvEz97+ZEbIHyyo="
-	plaintext, _ := enc.Decrypt(ciphertext)
-	fmt.Printf("The plaintext for %s is %s\n", ciphertext, plaintext)
+	ciphertext, _ := enc.Encrypt(plaintext, key)
+	fmt.Printf("Encrypt: %s -> %s\n", plaintext, ciphertext)
+
+	decrypted, _ := enc.Decrypt(ciphertext, key)
+	fmt.Printf("Decrypt: %s -> %s\n", ciphertext, decrypted)
 }

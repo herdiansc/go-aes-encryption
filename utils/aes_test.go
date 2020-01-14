@@ -4,6 +4,7 @@ import (
 	"crypto/cipher"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"testing"
 )
 
@@ -52,7 +53,10 @@ var(
 				return 0
 			},
 			MockOpen:         func(a, b, c, d []byte) ([]byte, error) {
-				return []byte(`CBTu4JktOk`), nil
+				return []byte(`SecretText`), nil
+			},
+			MockSeal:         func(a, b, c, d []byte) []byte {
+				return []byte(`Ciphertext123`)
 			},
 		}, nil
 	}
@@ -64,6 +68,19 @@ var(
 	}
 	FailedDecodeString = func(s string) ([]byte, error) {
 		return nil, errors.New("error")
+	}
+
+	SuccessIoReadFull = func(r io.Reader, buf []byte) (n int, err error) {
+		return 0, nil
+	}
+	FailedIoReadFull = func(r io.Reader, buf []byte) (n int, err error) {
+		return 0, errors.New("error")
+	}
+	SuccessEncodeToString = func(source []byte) string {
+		return "SecretText"
+	}
+	FailedEncodeToString = func(source []byte) string {
+		return ""
 	}
 )
 
@@ -80,7 +97,7 @@ func TestAesDecrypt(t *testing.T) {
 			NewCipher:    SuccessNewCipher,
 			NewGCM:       SuccessNewGCM,
 			DecodeString: SuccessDecodeString,
-			plaintext:    "CBTu4JktOk",
+			plaintext:    "SecretText",
 		},
 		{
 			testName:     "2. Negative Test: Fail cipher initialization",
@@ -111,7 +128,70 @@ func TestAesDecrypt(t *testing.T) {
 		enc.NewCipher = c.NewCipher
 		enc.NewGCM = c.NewGCM
 		enc.DecodeString = c.DecodeString
-		plaintext, _ := enc.Decrypt("abc123")
+		plaintext, _ := enc.Decrypt("CiphertextAbc123", "Key123")
+		assert.Equal(t, c.plaintext, plaintext)
+	}
+}
+
+func TestAesEncrypt(t *testing.T) {
+	cases := []struct {
+		testName       string
+		NewCipher      func(key []byte) (cipher.Block, error)
+		NewGCM         func(cipher cipher.Block) (cipher.AEAD, error)
+		EncodeToString func(source []byte) string
+		IoReadFull     func(r io.Reader, buf []byte) (n int, err error)
+		plaintext      string
+	}{
+		{
+			testName:       "1. Positive Test",
+			NewCipher:      SuccessNewCipher,
+			NewGCM:         SuccessNewGCM,
+			EncodeToString: SuccessEncodeToString,
+			IoReadFull:     SuccessIoReadFull,
+			plaintext:      "SecretText",
+		},
+		{
+			testName:       "2. Negative Test: Fail cipher initialization",
+			NewCipher:      FailedNewCipher,
+			NewGCM:         SuccessNewGCM,
+			EncodeToString: SuccessEncodeToString,
+			IoReadFull:     SuccessIoReadFull,
+			plaintext:      "",
+		},
+		{
+			testName:       "3. Negative Test: Fail GCM initialization",
+			NewCipher:      SuccessNewCipher,
+			NewGCM:         FailedNewGCM,
+			EncodeToString: SuccessEncodeToString,
+			IoReadFull:     SuccessIoReadFull,
+			plaintext:      "",
+		},
+		{
+			testName:       "4. Negative Test: Fail base64 decode",
+			NewCipher:      SuccessNewCipher,
+			NewGCM:         SuccessNewGCM,
+			EncodeToString: FailedEncodeToString,
+			IoReadFull:     SuccessIoReadFull,
+			plaintext:      "",
+		},
+		{
+			testName:       "5. Negative Test: Fail io.ReadFull",
+			NewCipher:      SuccessNewCipher,
+			NewGCM:         SuccessNewGCM,
+			EncodeToString: SuccessEncodeToString,
+			IoReadFull:     FailedIoReadFull,
+			plaintext:      "",
+		},
+	}
+
+	for _, c := range cases {
+		t.Logf("Currently testing %s", c.testName)
+		enc := NewAes()
+		enc.NewCipher = c.NewCipher
+		enc.NewGCM = c.NewGCM
+		enc.EncodeToString = c.EncodeToString
+		enc.IoReadFull = c.IoReadFull
+		plaintext, _ := enc.Encrypt("CiphertextAbc123", "Key123")
 		assert.Equal(t, c.plaintext, plaintext)
 	}
 }
