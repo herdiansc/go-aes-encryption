@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-aes-encryption-example/utils"
+	"github.com/herdiansc/go-aes-encryption-example/utils"
 )
 
 func main() {
