@@ -1,2 +1,2 @@
 # go-aes-encryption-example
-[![CircleCI](https://circleci.com/gh/herdiansc/go-aes-encryption-example.svg?style=svg)](https://circleci.com/gh/herdiansc/go-aes-encryption-example)
+[![Build Status](https://travis-ci.org/herdiansc/go-aes-encryption-example.svg?branch=master)](https://travis-ci.org/herdiansc/go-aes-encryption-example)
