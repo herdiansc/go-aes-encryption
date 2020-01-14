@@ -63,5 +63,5 @@ func (enc Aes) Encrypt(plaintext, key string) (string, error) {
 	data := []byte(plaintext)
 	ciphertext := gcm.Seal(nonce, nonce, data, nil)
 	encrypted := enc.EncodeToString(ciphertext)
-	return encrypted, err
+	return encrypted, nil
 }
