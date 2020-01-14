@@ -39,5 +39,9 @@ go:
 # .golangci.yml file at the top level of your repo.
 script:
 #   - golangci-lint run       # run a bunch of code checkers/linters in parallel
-  - go test -v -cover ./...  # Run all the tests with the race detector enabled
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go test -v -covermode=count -coverprofile=coverage.out
+  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken aN5B70KFqk8UaLPgFchKShWbqI1JBHyRm
+#  - go test -v -cover ./...  # Run all the tests with the race detector enabled
   - go build
