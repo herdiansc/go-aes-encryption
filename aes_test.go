@@ -8,7 +8,7 @@ import (
 )
 
 // MockBlock implements the cipher.Block interface
-type MockBlock struct{
+type MockBlock struct {
 	MockBlockSize       func() int
 	MockEncrypt         func(a, b []byte)
 	MockDecrypt         func(a, b []byte)
@@ -17,13 +17,20 @@ type MockBlock struct{
 	MockNewCBCDecrypter func([]byte) cipher.BlockMode
 	MockNewCTR          func([]byte) cipher.Stream
 }
-func (block *MockBlock) BlockSize() int                                  { return block.MockBlockSize() }
-func (block *MockBlock) Encrypt(a, b []byte)                             { block.MockEncrypt(a, b) }
-func (block *MockBlock) Decrypt(a, b []byte)                             { block.MockDecrypt(a, b) }
-func (block *MockBlock) NewGCM(cipher cipher.Block) (cipher.AEAD, error) { return block.MockNewGCM(cipher) }
-func (block *MockBlock) NewCBCEncrypter(a []byte) cipher.BlockMode       { return block.MockNewCBCEncrypter(a) }
-func (block *MockBlock) NewCBCDecrypter(a []byte) cipher.BlockMode       { return block.MockNewCBCDecrypter(a) }
-func (block *MockBlock) NewCTR(a []byte) cipher.Stream                   { return block.MockNewCTR(a) }
+
+func (block *MockBlock) BlockSize() int      { return block.MockBlockSize() }
+func (block *MockBlock) Encrypt(a, b []byte) { block.MockEncrypt(a, b) }
+func (block *MockBlock) Decrypt(a, b []byte) { block.MockDecrypt(a, b) }
+func (block *MockBlock) NewGCM(cipher cipher.Block) (cipher.AEAD, error) {
+	return block.MockNewGCM(cipher)
+}
+func (block *MockBlock) NewCBCEncrypter(a []byte) cipher.BlockMode {
+	return block.MockNewCBCEncrypter(a)
+}
+func (block *MockBlock) NewCBCDecrypter(a []byte) cipher.BlockMode {
+	return block.MockNewCBCDecrypter(a)
+}
+func (block *MockBlock) NewCTR(a []byte) cipher.Stream { return block.MockNewCTR(a) }
 
 // MockAEAD implements the cipher.AEAD interface
 type MockAEAD struct {
@@ -33,13 +40,14 @@ type MockAEAD struct {
 	MockOpen         func(a, b, c, d []byte) ([]byte, error)
 	MockInAESPackage func() bool
 }
+
 func (aead *MockAEAD) NonceSize() int                         { return aead.MockNonceSize() }
 func (aead *MockAEAD) Overhead() int                          { return aead.MockOverhead() }
 func (aead *MockAEAD) Seal(a, b, c, d []byte) []byte          { return aead.MockSeal(a, b, c, d) }
 func (aead *MockAEAD) Open(a, b, c, d []byte) ([]byte, error) { return aead.MockOpen(a, b, c, d) }
 func (aead *MockAEAD) InAESPackage() bool                     { return aead.MockInAESPackage() }
 
-var(
+var (
 	SuccessNewCipher = func(key []byte) (cipher.Block, error) {
 		return &MockBlock{}, nil
 	}
@@ -48,13 +56,13 @@ var(
 	}
 	SuccessNewGCM = func(cipher cipher.Block) (cipher.AEAD, error) {
 		return &MockAEAD{
-			MockNonceSize:    func() int {
+			MockNonceSize: func() int {
 				return 0
 			},
-			MockOpen:         func(a, b, c, d []byte) ([]byte, error) {
+			MockOpen: func(a, b, c, d []byte) ([]byte, error) {
 				return []byte(`SecretText`), nil
 			},
-			MockSeal:         func(a, b, c, d []byte) []byte {
+			MockSeal: func(a, b, c, d []byte) []byte {
 				return []byte(`Ciphertext123`)
 			},
 		}, nil
