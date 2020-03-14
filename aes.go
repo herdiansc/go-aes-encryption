@@ -1,4 +1,4 @@
-package utils
+package goaesencryption
 
 import (
 	"crypto/aes"

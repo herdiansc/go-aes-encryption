@@ -1,9 +1,8 @@
-package utils
+package goaesencryption
 
 import (
 	"crypto/cipher"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"testing"
 )
@@ -129,7 +128,9 @@ func TestAesDecrypt(t *testing.T) {
 		enc.NewGCM = c.NewGCM
 		enc.DecodeString = c.DecodeString
 		plaintext, _ := enc.Decrypt("CiphertextAbc123", "Key123")
-		assert.Equal(t, c.plaintext, plaintext)
+		if c.plaintext != plaintext {
+			t.Errorf("Expected :%v, given: %v", c.plaintext, plaintext)
+		}
 	}
 }
 
@@ -192,6 +193,8 @@ func TestAesEncrypt(t *testing.T) {
 		enc.EncodeToString = c.EncodeToString
 		enc.IoReadFull = c.IoReadFull
 		plaintext, _ := enc.Encrypt("CiphertextAbc123", "Key123")
-		assert.Equal(t, c.plaintext, plaintext)
+		if c.plaintext != plaintext {
+			t.Errorf("Expected :%v, given: %v", c.plaintext, plaintext)
+		}
 	}
 }
