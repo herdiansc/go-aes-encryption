@@ -2,7 +2,7 @@ package goaesencryption
 
 import (
 	"crypto/cipher"
-	"github.com/pkg/errors"
+	"errors"
 	"io"
 	"testing"
 )
