@@ -91,9 +91,10 @@ var (
 	}
 )
 
-func TestAesDecrypt(t *testing.T) {
+func TestAes_Decrypt(t *testing.T) {
 	cases := []struct {
 		testName     string
+		key          string
 		NewCipher    func(key []byte) (cipher.Block, error)
 		NewGCM       func(cipher cipher.Block) (cipher.AEAD, error)
 		DecodeString func(s string) ([]byte, error)
@@ -101,6 +102,7 @@ func TestAesDecrypt(t *testing.T) {
 	}{
 		{
 			testName:     "1. Positive Test",
+			key:          "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:    SuccessNewCipher,
 			NewGCM:       SuccessNewGCM,
 			DecodeString: SuccessDecodeString,
@@ -108,6 +110,7 @@ func TestAesDecrypt(t *testing.T) {
 		},
 		{
 			testName:     "2. Negative Test: Fail cipher initialization",
+			key:          "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:    FailedNewCipher,
 			NewGCM:       SuccessNewGCM,
 			DecodeString: SuccessDecodeString,
@@ -115,6 +118,7 @@ func TestAesDecrypt(t *testing.T) {
 		},
 		{
 			testName:     "3. Negative Test: Fail GCM initialization",
+			key:          "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:    SuccessNewCipher,
 			NewGCM:       FailedNewGCM,
 			DecodeString: SuccessDecodeString,
@@ -122,9 +126,18 @@ func TestAesDecrypt(t *testing.T) {
 		},
 		{
 			testName:     "4. Negative Test: Fail base64 decode",
+			key:          "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:    SuccessNewCipher,
 			NewGCM:       SuccessNewGCM,
 			DecodeString: FailedDecodeString,
+			plaintext:    "",
+		},
+		{
+			testName:     "5. Negative Test: empty key",
+			key:          "",
+			NewCipher:    SuccessNewCipher,
+			NewGCM:       SuccessNewGCM,
+			DecodeString: SuccessDecodeString,
 			plaintext:    "",
 		},
 	}
@@ -135,16 +148,17 @@ func TestAesDecrypt(t *testing.T) {
 		enc.NewCipher = c.NewCipher
 		enc.NewGCM = c.NewGCM
 		enc.DecodeString = c.DecodeString
-		plaintext, _ := enc.Decrypt("CiphertextAbc123", "Key123")
+		plaintext, _ := enc.Decrypt("CiphertextAbc123", c.key)
 		if c.plaintext != plaintext {
 			t.Errorf("Expected :%v, given: %v", c.plaintext, plaintext)
 		}
 	}
 }
 
-func TestAesEncrypt(t *testing.T) {
+func TestAes_Encrypt(t *testing.T) {
 	cases := []struct {
 		testName       string
+		key            string
 		NewCipher      func(key []byte) (cipher.Block, error)
 		NewGCM         func(cipher cipher.Block) (cipher.AEAD, error)
 		EncodeToString func(source []byte) string
@@ -153,6 +167,7 @@ func TestAesEncrypt(t *testing.T) {
 	}{
 		{
 			testName:       "1. Positive Test",
+			key:            "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:      SuccessNewCipher,
 			NewGCM:         SuccessNewGCM,
 			EncodeToString: SuccessEncodeToString,
@@ -161,6 +176,7 @@ func TestAesEncrypt(t *testing.T) {
 		},
 		{
 			testName:       "2. Negative Test: Fail cipher initialization",
+			key:            "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:      FailedNewCipher,
 			NewGCM:         SuccessNewGCM,
 			EncodeToString: SuccessEncodeToString,
@@ -169,6 +185,7 @@ func TestAesEncrypt(t *testing.T) {
 		},
 		{
 			testName:       "3. Negative Test: Fail GCM initialization",
+			key:            "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:      SuccessNewCipher,
 			NewGCM:         FailedNewGCM,
 			EncodeToString: SuccessEncodeToString,
@@ -177,6 +194,7 @@ func TestAesEncrypt(t *testing.T) {
 		},
 		{
 			testName:       "4. Negative Test: Fail base64 decode",
+			key:            "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:      SuccessNewCipher,
 			NewGCM:         SuccessNewGCM,
 			EncodeToString: FailedEncodeToString,
@@ -185,10 +203,20 @@ func TestAesEncrypt(t *testing.T) {
 		},
 		{
 			testName:       "5. Negative Test: Fail io.ReadFull",
+			key:            "ThisKeyHasToBe-32-CharactersLong",
 			NewCipher:      SuccessNewCipher,
 			NewGCM:         SuccessNewGCM,
 			EncodeToString: SuccessEncodeToString,
 			IoReadFull:     FailedIoReadFull,
+			plaintext:      "",
+		},
+		{
+			testName:       "6. Negative Test: Key is mandatory",
+			key:            "",
+			NewCipher:      SuccessNewCipher,
+			NewGCM:         SuccessNewGCM,
+			EncodeToString: SuccessEncodeToString,
+			IoReadFull:     SuccessIoReadFull,
 			plaintext:      "",
 		},
 	}
@@ -200,7 +228,7 @@ func TestAesEncrypt(t *testing.T) {
 		enc.NewGCM = c.NewGCM
 		enc.EncodeToString = c.EncodeToString
 		enc.IoReadFull = c.IoReadFull
-		plaintext, _ := enc.Encrypt("CiphertextAbc123", "Key123")
+		plaintext, _ := enc.Encrypt("CiphertextAbc123", c.key)
 		if c.plaintext != plaintext {
 			t.Errorf("Expected :%v, given: %v", c.plaintext, plaintext)
 		}

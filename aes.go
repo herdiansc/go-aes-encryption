@@ -5,9 +5,11 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"io"
 )
 
+// Aes defines functions use in encryption
 type Aes struct {
 	NewCipher      func(key []byte) (cipher.Block, error)
 	NewGCM         func(cipher cipher.Block) (cipher.AEAD, error)
@@ -16,6 +18,7 @@ type Aes struct {
 	IoReadFull     func(r io.Reader, buf []byte) (n int, err error)
 }
 
+// NewAes inits Aes
 func NewAes() Aes {
 	return Aes{
 		NewCipher:      aes.NewCipher,
@@ -26,8 +29,11 @@ func NewAes() Aes {
 	}
 }
 
-//Decrypt used to decrypt ciphertext encrypted using AES.
+// Decrypt used to decrypt ciphertext encrypted using AES.
 func (enc Aes) Decrypt(encrypted, key string) (string, error) {
+	if key == "" {
+		return "", errors.New("key is mandatory and has to be 32 chars long")
+	}
 	block, err := enc.NewCipher([]byte(key))
 	if err != nil {
 		return "", err
@@ -46,8 +52,11 @@ func (enc Aes) Decrypt(encrypted, key string) (string, error) {
 	return string(plaintext), err
 }
 
-//Encrypt used to encrypt plaintext using AES.
+// Encrypt used to encrypt plaintext using AES.
 func (enc Aes) Encrypt(plaintext, key string) (string, error) {
+	if key == "" {
+		return "", errors.New("key is mandatory and has to be 32 chars long")
+	}
 	block, err := enc.NewCipher([]byte(key))
 	if err != nil {
 		return "", err
